@@ -1,10 +1,13 @@
-import 'package:chat_app/widgets/login_labels.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'package:chat_app/widgets/label.dart';
-import 'package:chat_app/widgets/raised_button.dart';
+import '../helpers/show_alert.dart';
+import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/widgets/custom_imput_button.dart';
+import 'package:chat_app/widgets/label.dart';
+import 'package:chat_app/widgets/login_labels.dart';
 import 'package:chat_app/widgets/logo_login.dart';
+import 'package:chat_app/widgets/raised_button.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -50,14 +53,23 @@ class _Form extends StatefulWidget {
 class _FormState extends State<_Form> {
   final mailCtrl = TextEditingController();
   final pwdCtrl = TextEditingController();
+  final nameCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
         children: [
+          InputButton(
+            icon: Icons.perm_identity,
+            placeholder: 'Name',
+            textController: nameCtrl,
+            isPasword: false,
+          ),
           InputButton(
             icon: Icons.mail_outline,
             placeholder: 'Correo',
@@ -72,7 +84,30 @@ class _FormState extends State<_Form> {
             isPasword: true,
           ),
           RaisedButton(
-            buttonFunction: () => print(mailCtrl.text + pwdCtrl.text),
+            buttonFunction: authService.authenticating
+                ? () => {}
+                : () async {
+                    final registerOk = await authService.register(
+                      nameCtrl.text.trim(),
+                      mailCtrl.text.trim(),
+                      pwdCtrl.text.trim(),
+                    );
+
+                    if (registerOk == true) {
+                      //TODO: Connect to socket server
+
+                      //TODO: Navigate to next screen
+                      Navigator.pushReplacementNamed(context, 'users');
+                    } else {
+                      //show alert
+                      // ignore: use_build_context_synchronously
+                      showAlert(
+                        context,
+                        'Invalid Login',
+                        registerOk.toString(),
+                      );
+                    }
+                  },
             buttonLabel: 'Sign Up',
           ),
         ],

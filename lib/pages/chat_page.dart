@@ -65,21 +65,19 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         centerTitle: true,
         elevation: 2,
       ),
-      body: Container(
-        child: Column(
-          children: [
-            Flexible(
-              child: ListView.builder(
-                reverse: true,
-                physics: const BouncingScrollPhysics(),
-                itemCount: _messages.length,
-                itemBuilder: (_, i) => _messages[i],
-              ),
+      body: Column(
+        children: [
+          Flexible(
+            child: ListView.builder(
+              reverse: true,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _messages.length,
+              itemBuilder: (_, i) => _messages[i],
             ),
-            const Divider(height: 1),
-            _inputChat(),
-          ],
-        ),
+          ),
+          const Divider(height: 1),
+          _inputChat(),
+        ],
       ),
     );
   }
@@ -144,8 +142,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   }
 
   _handleText(String text) {
-    if (text.length == 0) return;
-    print(text);
+    if (text.isEmpty) return;
     _textController.clear();
     _focusNode.requestFocus();
 
@@ -167,7 +164,6 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     for (ChatMessage message in _messages) {
       message.animationController.dispose();
     }

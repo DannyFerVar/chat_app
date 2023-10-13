@@ -1,8 +1,12 @@
-import 'package:chat_app/widgets/login_labels.dart';
-import 'package:flutter/material.dart';
-
-import 'package:chat_app/widgets/label.dart';
+import 'package:chat_app/helpers/show_alert.dart';
 import 'package:chat_app/widgets/raised_button.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:chat_app/services/auth_service.dart';
+
+import 'package:chat_app/widgets/login_labels.dart';
+import 'package:chat_app/widgets/label.dart';
 import 'package:chat_app/widgets/custom_imput_button.dart';
 import 'package:chat_app/widgets/logo_login.dart';
 
@@ -25,7 +29,10 @@ class LoginPage extends StatelessWidget {
                 children: [
                   Logo(screenSize: screenSize, pageTitle: 'Messenger'),
                   const _Form(),
-                  const LoginLabels(labelText: '¿No tienes una cuenta?', labelTextBlue: '¡Crea una cuenta ahora!', route: 'register'),
+                  const LoginLabels(
+                      labelText: '¿No tienes una cuenta?',
+                      labelTextBlue: '¡Crea una cuenta ahora!',
+                      route: 'register'),
                   const Label(labelName: 'Terminos y condiciones'),
                 ],
               ),
@@ -50,6 +57,8 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -69,7 +78,26 @@ class _FormState extends State<_Form> {
             isPasword: true,
           ),
           RaisedButton(
-            buttonFunction: () => print(mailCtrl.text + pwdCtrl.text),
+            buttonFunction: authService.authenticating
+                ? () => {}
+                : () async {
+                    FocusScope.of(context).unfocus();
+
+                    final loginOk = await authService.login(
+                        mailCtrl.text.trim(), pwdCtrl.text.trim());
+
+                    if (loginOk) {
+                      //TODO: Connect to socket server
+
+                      //TODO: Navigate to next screen
+                      Navigator.pushReplacementNamed(context, 'users');
+                    } else {
+                      //show alert
+                      // ignore: use_build_context_synchronously
+                      showAlert(context, 'Invalid Login',
+                          'please verify your information');
+                    }
+                  },
             buttonLabel: 'Login',
           ),
         ],
