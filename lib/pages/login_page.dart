@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:chat_app/helpers/show_alert.dart';
+import 'package:chat_app/services/socket_service.dart';
 import 'package:chat_app/widgets/raised_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -58,6 +61,7 @@ class _FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
 
     return Container(
       margin: const EdgeInsets.only(top: 40),
@@ -87,13 +91,9 @@ class _FormState extends State<_Form> {
                         mailCtrl.text.trim(), pwdCtrl.text.trim());
 
                     if (loginOk) {
-                      //TODO: Connect to socket server
-
-                      //TODO: Navigate to next screen
+                      socketService.connect();
                       Navigator.pushReplacementNamed(context, 'users');
                     } else {
-                      //show alert
-                      // ignore: use_build_context_synchronously
                       showAlert(context, 'Invalid Login',
                           'please verify your information');
                     }

@@ -103,7 +103,6 @@ class AuthService with ChangeNotifier {
       },
     );
 
-
     if (resp.statusCode == 200) {
       final loginResponse = loginResponseFromJson(resp.body);
       user = loginResponse.user;
