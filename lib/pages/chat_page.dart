@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chat_app/models/messages_response.dart';
 import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/services/chat_service.dart';
 import 'package:chat_app/services/socket_service.dart';
@@ -23,6 +24,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   late SocketService socketService;
   late AuthService authService;
   final List<ChatMessage> _messages = [];
+
   bool isWritting = false;
 
   @override
@@ -32,6 +34,42 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     chatService = Provider.of<ChatService>(context, listen: false);
     socketService = Provider.of<SocketService>(context, listen: false);
     authService = Provider.of<AuthService>(context, listen: false);
+
+    socketService.socket.on('personal-message', _listenMessage);
+
+    _loadHistory(chatService.userTo.uid);
+  }
+
+  void _loadHistory(String userID) async {
+    MessagesResponse chat = await chatService.getChat(userID);
+
+    final history = chat.map((m) => ChatMessage(
+          message: m.message,
+          uid: m.from,
+          animationController: AnimationController(
+              vsync: this, duration: Duration(milliseconds: 0))
+            ..forward(),
+        ));
+
+    setState(() {
+      _messages.insertAll(0, history);
+    });
+  }
+
+  void _listenMessage(dynamic payload) {
+    ChatMessage message = ChatMessage(
+      message: payload['message'],
+      uid: payload['from'],
+      animationController: AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 300),
+      ),
+    );
+    setState(() {
+      _messages.insert(0, message);
+    });
+
+    message.animationController.forward();
   }
 
   @override
@@ -165,7 +203,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
     final newMessage = ChatMessage(
       message: text,
-      uid: '123',
+      uid: authService.user!.uid,
       animationController: AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 300),
